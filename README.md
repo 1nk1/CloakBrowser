@@ -1488,6 +1488,7 @@ Issues and PRs welcome. If something isn't working, [open an issue](https://gith
 - [@dstosch](https://github.com/dstosch) — cloakserve idle cleanup for browsers launched over HTTP
 - [@bercedev](https://github.com/bercedev) — humanize support for compiled (Nuitka) Playwright builds
 - [@laplace-anon](https://github.com/laplace-anon) — humanize fix for Playwright 1.64
+- [@theaafofficial](https://github.com/theaafofficial) — non-blocking async launches (GeoIP, WebRTC and license lookups off the event loop)
 
 ## Star History
 
