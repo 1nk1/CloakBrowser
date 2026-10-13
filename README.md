@@ -39,7 +39,7 @@ Same API, same code — just swap the import. <strong>3 lines of code, 30 second
 - **87 source-level C++ patches** — canvas, WebGL, audio, fonts, GPU, screen, WebRTC, network timing, automation signals, CDP input behavior
 - **`humanize=True`** — human-like mouse curves, keyboard timing, and scroll patterns. One flag, behavioral detection passes
 - **Pro: 0.9 reCAPTCHA v3 score** — human-level, server-verified
-- **Passes Cloudflare Turnstile**, FingerprintJS, BrowserScan — tested against 30+ detection sites
+- **Passes Cloudflare Turnstile**, FingerprintJS, BrowserScan — tested against 50+ detection sites
 - **Auto-downloads the right binary** — free or Pro based on your license
 - **`pip install cloakbrowser`** or **`npm install cloakbrowser`** — binary auto-downloads, zero config
 - **Latest binary, free to try** — [sign in with GitHub](https://cloakbrowser.dev/free), point the newest build at your hardest target, scale to thousands of sessions on Pro
@@ -150,9 +150,9 @@ page.goto("https://example.com")
 
 ---
 
-## Latest: v0.6.2 — 87 source-level stealth patches (Chromium 154.0.8037.57.1)
+## Latest: v0.6.2 — 87 source-level stealth patches (Chromium 154.0.8037.57.2)
 
-- **CloakBrowser Pro Stable** — Chromium `154.0.8037.57.1` on Linux x64, Linux ARM64, Windows x64, and macOS (Apple Silicon and Intel). Set a `license_key` (`licenseKey` in JS) or the `CLOAKBROWSER_LICENSE_KEY` env var and the wrapper fetches the latest Stable build for your platform automatically. See [CloakBrowser Pro](#cloakbrowser-pro)
+- **CloakBrowser Pro Stable** — Chromium `154.0.8037.57.2` on Linux x64 and Linux ARM64; `154.0.8037.57.1` on Windows x64 and macOS (Apple Silicon and Intel). Set a `license_key` (`licenseKey` in JS) or the `CLOAKBROWSER_LICENSE_KEY` env var and the wrapper fetches the latest Stable build for your platform automatically. See [CloakBrowser Pro](#cloakbrowser-pro)
 - **.NET 8 / C# client** — CloakBrowser now ships as a NuGet package (`CloakBrowser`), mirroring the Python and JS wrappers.
 - **Chromium 154 upgrade** — rebased the full patch set onto Chromium 154 on every platform; macOS moves up from Chromium 151
 - **87 fingerprint patches** — rendering consistency improvements across Linux and Windows, corrected GPU/display/graphics parameters to match stock Chrome profiles
@@ -235,7 +235,7 @@ All tests verified against live detection services. Results below are for the la
 | UA string | `HeadlessChrome` | **`Chrome/151.0.0.0`** | No headless leak |
 | CDP detection | Detected | **Not detected** | `isAutomatedWithCDP: false` |
 | TLS fingerprint | Mismatch | **Identical to Chrome** | ja3n/ja4/akamai match |
-| | | **Tested against 30+ detection sites** | |
+| | | **Tested against 50+ detection sites** | |
 
 ### Proof
 
@@ -750,13 +750,14 @@ Supported by the binary but **not set by default** — pass via `args` to custom
 | `--fingerprint-locale` | Locale (e.g. `en-US`) |
 | `--fingerprint-storage-quota` | Override storage quota in MB — affects `storage.estimate()`, `storageBuckets`, and legacy webkit APIs. Auto-normalized when `--fingerprint` is set |
 | `--fingerprint-taskbar-height` | Override taskbar height (binary defaults: Win=48, Mac=95, Linux=0) |
-| `--fingerprint-windows-font-metrics` | **Chromium 148+ binary only** (no-op on earlier builds). Align font metrics with the Windows platform when spoofing Windows on Linux — used in the [FingerprintJS config](#detected-by-fingerprintjs). Requires Windows fonts installed (see [Font Setup on Linux](#font-setup-on-linux)); no effect without them |
+| `--fingerprint-windows-font-metrics` | **Chromium 148+ binary only** (no-op on earlier builds). Align font metrics with the Windows platform when spoofing Windows on Linux — used in the [FingerprintJS config](#detected-by-fingerprintjs). Requires Windows fonts installed (see [Font Setup on Linux](#font-setup-on-linux)); no effect without them. On `154.0.8037.57.2` and newer this is on by default when the Windows fonts are installed, so the flag is no longer needed |
 | `--fingerprint-webrtc-ip` | WebRTC ICE candidate IP replacement. Use `auto` to resolve from proxy exit IP (makes an HTTP call through the proxy), or pass an explicit IP. Auto-injected when `geoip=True` |
 | `--fingerprint-noise=false` | Disable noise injection (canvas, WebGL, audio, client rects) while keeping the deterministic fingerprint seed active |
 | `--fingerprint=off` | **Chromium 148+ binary only.** Pass-through debug mode — turns spoofing off and presents the machine's **real native fingerprint** (keeps only the baseline any Chrome needs). The binary strips the injected seed *and* `--fingerprint-platform`, so there's no mixed OS profile. Most useful on a genuine Windows machine to check whether an issue is our spoofing or the environment. Accepts `off`/`false`/`0`/`disable`/`disabled`. For a *pure* pass-through don't combine it with `geoip=True` / explicit timezone / locale — those stay applied. |
 | `--fingerprint-allow-3p-cookies` | **Chromium 148+ binary only.** Re-enable third-party cookies for embedded flows that need them (reCAPTCHA v3, SSO, some payment challenges). Off by default; turn on only where a login/payment/embedded challenge loads but never finishes. |
 | `--fingerprint-sapi-voices=false` | **Chromium 150+ binary only.** Opt out of the Windows speech-voice tables when spoofing Windows. On by default (the voice set matches a real Chrome install); turn off only if a target reacts badly to the Windows voice list. |
-| `--license-through-proxy` | **Chromium 148+ binary only (all platforms).** Route the Pro license/session calls through your `--proxy-server` instead of direct to cloakbrowser.dev. Off by default (these calls go direct, so they never spend proxy bandwidth or touch your scraping session). |
+| `--license-route=auto\|direct\|proxy` | **Chromium 154.0.8037.57.2+ binary only.** How the Pro license and session calls leave the browser. `auto` (default): direct to cloakbrowser.dev first, and one retry through your `--proxy-server` if direct can't reach it. `direct`: never through the proxy. `proxy`: only through the proxy (needs `--proxy-server`). |
+| `--license-through-proxy` | **Chromium 148+ binary only (all platforms).** Route the Pro license/session calls through your `--proxy-server` instead of direct to cloakbrowser.dev. Off by default (these calls go direct, so they never spend proxy bandwidth or touch your scraping session). On `154.0.8037.57.2` and newer, use `--license-route=proxy`; this older spelling still works. |
 | `--fingerprint-transparent-proxy` | **Chromium 151+ binary only.** A stronger way of connecting through your `--proxy-server`, for sites and providers that block every proxy you try. Off by default; enable it alongside `--proxy-server`. |
 | `--fingerprint-portable-cookies` | **Chromium 151+ binary only.** Encrypt cookies with a machine-independent key so a copied profile keeps its logins across machines. Turn it on from the first launch — it changes how cookies are written, so a cookie is only portable if this was set when it was saved. |
 | `--enable-blink-features=FakeShadowRoot` | Access closed shadow DOM elements |
