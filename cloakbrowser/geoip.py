@@ -140,6 +140,10 @@ def resolve_proxy_geo_with_ip(
             timezone = resp.location.time_zone
             country = resp.country.iso_code
             locale = COUNTRY_LOCALE_MAP.get(country) if country else None
+            if locale is None:
+                # Map gap, not a lookup failure — don't abort the launch over it
+                logger.warning("GeoIP: no locale for country %s (IP %s), using en-US", country, ip)
+                locale = "en-US"
             logger.debug(
                 "GeoIP: %s → tz=%s, country=%s, locale=%s",
                 ip, timezone, country, locale,

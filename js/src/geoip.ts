@@ -125,8 +125,13 @@ export async function resolveProxyGeo(
     const result = reader.get(ip) as any;
     const timezone: string | null = result?.location?.time_zone ?? null;
     const countryCode: string | null = result?.country?.iso_code ?? null;
-    const locale =
+    let locale =
       countryCode ? (COUNTRY_LOCALE_MAP[countryCode] ?? null) : null;
+    if (locale === null) {
+      // Map gap, not a lookup failure — don't abort the launch over it
+      console.warn(`[cloakbrowser] GeoIP: no locale for country ${countryCode} (IP ${ip}), using en-US`);
+      locale = "en-US";
+    }
     return { timezone, locale, exitIp: ip };
   } catch (error) {
     const detail = error instanceof Error ? error.message : String(error);

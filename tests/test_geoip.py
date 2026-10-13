@@ -128,6 +128,23 @@ def test_resolve_geo_raises_when_db_missing():
                     resolve_proxy_geo_with_ip("http://10.50.96.5:8888")
 
 
+def test_resolve_geo_unmapped_country_falls_back_to_en_us():
+    """A country missing from COUNTRY_LOCALE_MAP must not abort the launch (#591)."""
+    resp = MagicMock()
+    resp.location.time_zone = "Indian/Mahe"
+    resp.country.iso_code = "XX"
+    reader = MagicMock()
+    reader.return_value.__enter__.return_value.city.return_value = resp
+    mock_geoip2 = type("module", (), {"database": type("db", (), {"Reader": reader})})()
+    with patch.dict("sys.modules", {"geoip2": mock_geoip2, "geoip2.database": mock_geoip2.database}):
+        with patch("cloakbrowser.geoip._ensure_geoip_db", return_value=object()):
+            with patch("cloakbrowser.geoip._resolve_exit_ip", return_value="9.8.7.6"):
+                from cloakbrowser.geoip import resolve_proxy_geo_with_ip
+                assert resolve_proxy_geo_with_ip("http://10.50.96.5:8888") == (
+                    "Indian/Mahe", "en-US", "9.8.7.6",
+                )
+
+
 def test_resolve_geo_raises_when_lookup_fails():
     """A corrupt or unreadable database must abort requested GeoIP resolution."""
     reader = MagicMock(side_effect=ValueError("corrupt database"))
