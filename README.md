@@ -689,7 +689,7 @@ For an arbitrary expression, `page._stealth_world.evaluate("…")` evaluates it 
 | `CLOAKBROWSER_WIDEVINE_CDM` | — | Path to a sideloaded `WidevineCdm` directory (overrides auto-detection next to the binary). See [Widevine / DRM](#widevine--drm) |
 | `CLOAKBROWSER_WIDEVINE` | `1` | Set to `0` to disable automatic Widevine hint-file seeding for persistent contexts |
 | `CLOAKBROWSER_FETCH_WIDEVINE` | `0` | Docker only: set to `1` to auto-fetch the Widevine CDM on container start (Linux x86-64 only). See [Widevine / DRM](#widevine--drm) |
-| `CLOAKBROWSER_VERSION` | — | Pin to an exact Chromium version for rollback (e.g. `154.0.8037.57.1`). Works with Free and Pro binaries |
+| `CLOAKBROWSER_VERSION` | — | Pin to an exact Chromium version for rollback (e.g. `154.0.8037.57.1`). Paid Pro key only |
 | `CLOAKBROWSER_RELEASE_CHANNEL` | `stable` | Set to `preview` to opt into the Preview binary channel |
 
 ## Fingerprint Management
@@ -1296,23 +1296,18 @@ Preview availability is platform-specific. Preview always selects the newest bui
 
 Two ways to go back to a working version:
 
-**Pin the binary** (keep current wrapper, just use an older Chromium) — works for Free and Pro:
+**Pin the binary** (keep current wrapper, just use an older Chromium) — paid Pro key only. A free GitHub key cannot pin: it ignores the pin and always gets the latest build.
 
 ```python
-# Free — pin a public release
-browser = launch(browser_version="146.0.7680.177.5")
-
-# Pro — pin a specific Pro version
 browser = launch(license_key="cb_xxxxxxxx", browser_version="154.0.8037.57.1")
 ```
 
 ```bash
-export CLOAKBROWSER_VERSION=146.0.7680.177.5   # env var for all launches
+export CLOAKBROWSER_VERSION=154.0.8037.57.1   # env var for all launches
 ```
 
 ```javascript
-// Free — pin a public release
-const browser = await launch({ browserVersion: '146.0.7680.177.5' });
+const browser = await launch({ licenseKey: 'cb_xxxxxxxx', browserVersion: '154.0.8037.57.1' });
 ```
 
 The pin is never sticky — unpinned launches always use the latest available version.
