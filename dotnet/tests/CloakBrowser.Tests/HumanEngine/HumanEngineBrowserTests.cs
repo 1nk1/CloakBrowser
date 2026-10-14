@@ -319,10 +319,11 @@ public class HumanEngineBrowserTests : IClassFixture<EngineFixture>, IAsyncLifet
         // Playwright rejects with "Unknown key"). Same value as on main.
         var p = await Open();
         await p.GotoAsync("data:text/html," + Uri.EscapeDataString("<textarea id=\"ta\"></textarea>"));
+        // A textarea's value normalizes "\r\n" to "\n".
         await p.FillAsync("#ta", "ab\r\ncd");
-        Assert.Equal("ab\r\ncd", await p.EvaluateAsync<string>("document.getElementById('ta').value"));
+        Assert.Equal("ab\ncd", await p.EvaluateAsync<string>("document.getElementById('ta').value"));
         await p.Locator("#ta").PressSequentiallyAsync("\r\nef");
-        Assert.Equal("ab\r\ncd\r\nef", await p.EvaluateAsync<string>("document.getElementById('ta').value"));
+        Assert.Equal("ab\ncd\nef", await p.EvaluateAsync<string>("document.getElementById('ta').value"));
     }
 
     [BrowserFact]
